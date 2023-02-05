@@ -1,6 +1,6 @@
 # Homework16
-
-# aws ec2 create-vpc --cidr-block 10.0.0.0/16 --tag-specifications "ResourceType=vpc,Tags=[{Key=Name,Value=my-vpc}]" > readme.txt
+# Create a VPC
+## aws ec2 create-vpc --cidr-block 10.0.0.0/16 --tag-specifications "ResourceType=vpc,Tags=[{Key=Name,Value=my-vpc}]" > readme.txt
 
 {
     "Vpc": {
@@ -29,12 +29,11 @@
         ]
     }
 }
-## VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=my-vpc" --query 'Vpcs[*].VpcId' --output text)
-echo "VPC ID: $VPC_ID" >> readme.txt
+## VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=my-vpc" --query 'Vpcs[*].VpcId' --output text) echo "VPC ID: $VPC_ID" >> readme.txt
 
 VPC ID: vpc-056f94061c71b6ae7
-
-aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.1.0/24 --availability-zone us-east-1a --tag-specifications "ResourceType=subnet,Tags=[{Key=Name,Value=public}]" >> readme.txt
+# Create public subnet
+## aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.1.0/24 --availability-zone us-east-1a --tag-specifications "ResourceType=subnet,Tags=[{Key=Name,Value=public}]" >> readme.txt
 {
     "Subnet": {
         "AvailabilityZone": "us-east-1a",
@@ -65,8 +64,8 @@ aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.1.0/24 --availability-z
         }
     }
 }
-
-aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.2.0/24 --availability-zone us-east-1b --tag-specifications "ResourceType=subnet,Tags=[{Key=Name,Value=private}]" >> readme.txt
+# Create private subnet
+## aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.2.0/24 --availability-zone us-east-1b --tag-specifications "ResourceType=subnet,Tags=[{Key=Name,Value=private}]" >> readme.txt
 {
     "Subnet": {
         "AvailabilityZone": "us-east-1b",
@@ -97,22 +96,25 @@ aws ec2 create-subnet --vpc-id $VPC_ID --cidr-block 10.0.2.0/24 --availability-z
         }
     }
 }
-
-IGW_ID=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text)
-aws ec2 attach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID >> readme.txt
-
-RTB_ID=$(aws ec2 create-route-table --vpc-id $VPC_ID --query 'RouteTable.RouteTableId' --output text)
-aws ec2 create-route --route-table-id $RTB_ID --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW_ID >> readme.txt
+# Create Internet Gateway
+## IGW_ID=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text)
+# Attach Internet Gateway to the VPC
+## aws ec2 attach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC_ID >> readme.txt
+# Create a route table
+## RTB_ID=$(aws ec2 create-route-table --vpc-id $VPC_ID --query 'RouteTable.RouteTableId' --output text)
+# Create a route to Internet Gateway in the route table
+## aws ec2 create-route --route-table-id $RTB_ID --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW_ID >> readme.txt
 
 {
     "Return": true
 }
 
 
-PUBLIC_SUBNET_ID=$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=public" --query "Subnets[0].SubnetId" --output text)
-PUBLIC_ROUTE_TABLE_ID=$(aws ec2 create-route-table --vpc-id $VPC_ID --query "RouteTable.RouteTableId" --output text)
-aws ec2 create-route --route-table-id $PUBLIC_ROUTE_TABLE_ID --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW_ID >> readme.txt
-aws ec2 associate-route-table --route-table-id $PUBLIC_ROUTE_TABLE_ID --subnet-id $PUBLIC_SUBNET_ID >> readme.txt
+# Associate the public subnet with the route table
+## PUBLIC_SUBNET_ID=$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=public" --query "Subnets[0].SubnetId" --output text)
+## PUBLIC_ROUTE_TABLE_ID=$(aws ec2 create-route-table --vpc-id $VPC_ID --query "RouteTable.RouteTableId" --output text)
+## aws ec2 create-route --route-table-id $PUBLIC_ROUTE_TABLE_ID --destination-cidr-block 0.0.0.0/0 --gateway-id $IGW_ID >> readme.txt
+## aws ec2 associate-route-table --route-table-id $PUBLIC_ROUTE_TABLE_ID --subnet-id $PUBLIC_SUBNET_ID >> readme.txt
 
 {
     "Return": true
@@ -124,14 +126,14 @@ aws ec2 associate-route-table --route-table-id $PUBLIC_ROUTE_TABLE_ID --subnet-i
     }
 }
 
-aws ec2 describe-subnets --filters "Name=tag:Name,Values=private" --query "Subnets[*].{CIDR:CidrBlock}" >> readme.txt
+## aws ec2 describe-subnets --filters "Name=tag:Name,Values=private" --query "Subnets[*].{CIDR:CidrBlock}" >> readme.txt
 [
     {
         "CIDR": "10.0.2.0/24"
     }
 ]
 
-
-aws ec2 describe-images --owners 'amazon' --region us-west-2 --filters 'Name=architecture,Values=x86_64' 'Name=description,Values=Amazon Linux 2 *' --query "sort_by(Images, &CreationDate)[-1].ImageId"  --output text>>readmi.txt
+# Return the latest Amazon Linux 2 x86_64 AMI ID owned by Amazon
+## aws ec2 describe-images --owners 'amazon' --region us-west-2 --filters 'Name=architecture,Values=x86_64' 'Name=description,Values=Amazon Linux 2 *' --query "sort_by(Images, &CreationDate)[-1].ImageId"  --output text>>readmi.txt
 
 ami-0720d173d2dc9052b
