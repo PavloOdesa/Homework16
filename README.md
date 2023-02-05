@@ -29,7 +29,7 @@
         ]
     }
 }
-VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=my-vpc" --query 'Vpcs[*].VpcId' --output text)
+## VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=my-vpc" --query 'Vpcs[*].VpcId' --output text)
 echo "VPC ID: $VPC_ID" >> readme.txt
 
 VPC ID: vpc-056f94061c71b6ae7
